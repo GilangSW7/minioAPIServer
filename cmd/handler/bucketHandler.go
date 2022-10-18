@@ -9,6 +9,7 @@ import (
 	"minioAPI/cmd/model"
 	"minioAPI/configs"
 	"net/http"
+	"path/filepath"
 )
 
 // connect to minio
@@ -119,4 +120,53 @@ func RequestRemoveBucketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Bucket Delete is Success"))
+}
+
+func RequestUploadObjectToBuckettHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Receive request for get bucket")
+
+	vars := mux.Vars(r)
+	name := vars["name"]
+
+	r.ParseMultipartForm(10 << 20)
+	file, handler, err := r.FormFile("myFile")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Error Retrieving the File"))
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+	ext1 := filepath.Ext(handler.Filename)
+	if ext1 != ".jpg" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Extension not supported"))
+		return
+	}
+
+	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+	fmt.Printf("File Size: %+v\n", handler.Size)
+	fmt.Printf("MIME Header: %+v\n", handler.Header)
+
+	found, err := s3Client.BucketExists(context.Background(), name)
+
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("internal server Error"))
+		return
+	}
+	if !found {
+		fmt.Println("Bucket not found")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Bucket not Found"))
+	}
+	uploadInfo, err := s3Client.PutObject(context.Background(), name, handler.Filename, file, handler.Size, minio.PutObjectOptions{ContentType: "application/octet-stream"})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	jsonResponseByte, _ := json.Marshal(uploadInfo)
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonResponseByte)
 }

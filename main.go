@@ -13,7 +13,7 @@ func main() {
 	router := mux.NewRouter()
 
 	srvOptions := &http.Server{
-		Addr:         fmt.Sprintf("0.0.0.0:%s", "8080"),
+		Addr:         fmt.Sprintf("0.0.0.0:%s", "8090"),
 		WriteTimeout: time.Second * 5,
 		ReadTimeout:  time.Second * 5,
 		IdleTimeout:  time.Second * 5,
@@ -25,6 +25,7 @@ func main() {
 	router.HandleFunc("/bucket", handler.RequestGetHandler).Methods(http.MethodGet)
 	router.HandleFunc("/bucket/{name}", handler.RequestGetObjectBucketListHandler).Methods(http.MethodGet)
 	router.HandleFunc("/bucket/{name}", handler.RequestRemoveBucketHandler).Methods(http.MethodDelete)
+	router.HandleFunc("/bucket/{name}/object", handler.RequestUploadObjectToBuckettHandler).Methods(http.MethodPost)
 
 	//start Server
 	log.Fatalln(srvOptions.ListenAndServe())
