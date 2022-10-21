@@ -25,6 +25,7 @@ func main() {
 	router.HandleFunc("/bucket", handler.RequestGetHandler).Methods(http.MethodGet)
 	router.HandleFunc("/bucket/{name}", handler.RequestGetObjectBucketListHandler).Methods(http.MethodGet)
 	router.HandleFunc("/bucket/{name}", handler.RequestRemoveBucketHandler).Methods(http.MethodDelete)
+	router.HandleFunc("/bucket/{name}/scheduler", handler.RequestSchedulerDeleteObjectBucket).Methods(http.MethodDelete)
 	router.HandleFunc("/bucket/{name}/object", handler.RequestUploadObjectToBuckettHandler).Methods(http.MethodPost)
 
 	//start Server
