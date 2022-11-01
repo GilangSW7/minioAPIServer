@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/minio/minio-go/v7"
+	"github.com/spf13/viper"
 	"log"
 	"minioAPI/cmd/model"
 	"minioAPI/configs"
@@ -218,4 +219,40 @@ func RequestSchedulerDeleteObjectBucket(w http.ResponseWriter, r *http.Request) 
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Scheduler is Running and Succes delete " + strconv.Itoa(count)))
+}
+
+func GetVersionHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Receive request for get Version API")
+
+	cfg, err := loadConfig()
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Cant take from file config"))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("API Version " + cfg.Version))
+
+}
+
+func loadConfig() (cfg model.Config, err error) {
+	viper.AddRemoteProvider("etcd3", "https://raw.githubusercontent.com", "/GilangSW7/disney-char-expressjs-api/main/package-lock.json")
+	viper.SetConfigType("json")
+
+	//local file
+	//viper.AddConfigPath(".")
+	//viper.SetConfigName("app")
+	//viper.SetConfigType("yaml")
+
+	viper.AutomaticEnv()
+
+	err = viper.ReadInConfig()
+	if err != nil {
+		return
+	}
+
+	err = viper.Unmarshal(&cfg)
+	return
 }

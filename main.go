@@ -27,7 +27,7 @@ func main() {
 	router.HandleFunc("/bucket/{name}", handler.RequestRemoveBucketHandler).Methods(http.MethodDelete)
 	router.HandleFunc("/bucket/{name}/scheduler", handler.RequestSchedulerDeleteObjectBucket).Methods(http.MethodDelete)
 	router.HandleFunc("/bucket/{name}/object", handler.RequestUploadObjectToBuckettHandler).Methods(http.MethodPost)
-
+	router.HandleFunc("/version", handler.GetVersionHandler).Methods(http.MethodGet)
 	//start Server
 	log.Fatalln(srvOptions.ListenAndServe())
 
